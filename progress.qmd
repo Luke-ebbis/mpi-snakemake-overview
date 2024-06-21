@@ -1,0 +1,99 @@
+---
+title: "Reproducable bioinformatics with `Snakemake`"
+subtitle: "How and why to use snakemake"
+author: 
+  - name: "Sibbe Bakker"
+format: 
+  revealjs:
+    self-contained: true
+    embed-resources: true
+    csl:  diabetologia.csl
+    slide-number: c/t
+    scrollable: true
+    navigation-mode: grid
+    mermaid:
+      theme: neutral
+    #mermaid-format: png
+  beamer:
+    echo: true
+    fontsize: '11pt'
+bibliography: "bib/BibDataBase.bib"
+biblio-style: apalike
+---
+
+
+
+# Introduction
+
+## Is this familiar?
+
+::: incremental
+
+1. You are working on the command line.
+
+2. You execute a whole pipeline and it works nicely.
+
+3. But in the end, you need to re-run it with a different parameter.
+
+::: {.fragment}
+
+> How can you easily do this?
+
+:::
+
+:::
+
+## Workflow languages
+
+* There are programming languages to solve this exact problem.
+
+  - Snakemake
+
+  - CLW
+  
+  - Nextflow.
+  
+
+## Why Snakemake
+
+* Flexible and python based.
+
+* Easy to install.
+
+* Large pool of examples.
+
+## Enough chit-chat, what does it look like?
+
+## Instalation and basic usage
+
+Get Snakemake with the following commands
+
+```
+$ curl -fsSL https://pixi.sh/install.sh | bash
+
+$ pixi global install snakemake -c bioconda -c conda-forge
+```
+
+## What is the premise?
+
+![The basic idea of snakemake [@FrequentlyAskedQuestionsa]](inclusions/snakemake-overview.png)
+
+# Advanced usage
+
+_see the [documentation](https://snakemake.readthedocs.io/en/stable/) for more information_
+
+## Monitoring and stopping the Snakemake.
+
+
+* `killall -TERM snakemake`
+
+::: aside
+
+Taken from the [FAQ](https://snakemake.readthedocs.io/en/v7.0.3/project_info/faq.html#id43)
+
+:::
+
+# Further information
+
+## Cited works
+
