@@ -64,19 +64,23 @@ biblio-style: apalike
 
 ## Enough chit-chat, what does it look like?
 
-## Instalation and basic usage
+![The basic idea of snakemake [@FrequentlyAskedQuestionsa]](inclusions/snakemake-overview.png)
+
+## Getting started$\dots$
 
 Get Snakemake with the following commands
 
 ```
+# Dowload Pixi, a modern conda
 $ curl -fsSL https://pixi.sh/install.sh | bash
-
-$ pixi global install snakemake -c bioconda -c conda-forge
+# Download Snakemake.
+$ pixi global install snakemake=8.13.0   -c conda-forge -c bioconda
+# Check instalation
+$ snakemake --version
+8.13.0
 ```
 
-## What is the premise?
 
-![The basic idea of snakemake [@FrequentlyAskedQuestionsa]](inclusions/snakemake-overview.png)
 
 # Advanced usage
 
@@ -94,6 +98,12 @@ Taken from the [FAQ](https://snakemake.readthedocs.io/en/v7.0.3/project_info/faq
 :::
 
 # Further information
+
+## Repositories
+
+* This presentation: <br>  `https://github.com/Luke-ebbis/mpi-snakemake-overview`.
+
+* Example workflow for the raven cluster: <br>  `https://github.com/Luke-ebbis/snakemake-pixi`.
 
 ## Cited works
 
