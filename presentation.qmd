@@ -54,7 +54,9 @@ biblio-style: apalike
   - Nextflow.
   
 
-## Why Snakemake
+## Snakemake
+
+* Designed for bioinformatics.
 
 * Flexible and python based.
 
@@ -62,25 +64,193 @@ biblio-style: apalike
 
 * Large pool of examples.
 
-## Enough chit-chat, what does it look like?
+## What is a snakemake workflow?
+
+::: incremental
+
+::: {.fragment}
 
 ![The basic idea of snakemake [@FrequentlyAskedQuestionsa]](inclusions/snakemake-overview.png)
 
+:::
+
+::: {.fragment}
+
+```shell
+# Run by typing
+$ snakemake
+```
+
+
+:::
+
+
+:::
+
 ## Getting started$\dots$
 
-Get Snakemake with the following commands
 
-```
-# Dowload Pixi, a modern conda
-$ curl -fsSL https://pixi.sh/install.sh | bash
-# Download Snakemake.
-$ pixi global install snakemake=8.13.0   -c conda-forge -c bioconda
-# Check instalation
-$ snakemake --version
-8.13.0
+Get Snakemake with the following commands^[From the [Documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html)]
+
+```shell
+# Assuming a bashlike environement...
+conda install -n base -c conda-forge mamba
+mamba create -c conda-forge--c bioconda -n snakemakes snakemake
+mamba activate snakemake
 ```
 
 
+> Lets get started with an example problem...
+
+
+# Read mapping with Snakemake
+
+## Initialisation
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+::: incremental
+
+* We work on a git repository.
+
+* We work with a set file structure.
+
+* We specificy dependencies via conda.
+
+:::
+
+:::
+
+::: {.column width="60%"}
+
+```shell
+
+$ git init snakemake-example
+$ mkdir -p workflow/envs workflow/scripts
+$ touch workflow/Snakefile
+$ mkdir data results
+$ tree
+├── LICENSE
+├── README.md
+|── results/
+|── data/
+└── workflow/
+    ├── envs/
+    |── scripts/
+    └── Snakefile
+
+```
+:::
+:::
+
+## First rule: QC (i)
+
+
+```
+$ cd data
+$ wget https://osf.io/2jc4a/download -O download.tar.gz
+$ tar -xzf download.tar.gz
+$ ls data
+anc_R1.fastq.gz  anc_R2.fastq.gz  evol1_R1.fastq.gz
+evol1_R2.fastq.gz  evol2_R1.fastq.gz  evol2_R2.fastq.gz
+```
+
+Now quality control:
+
+* We need `fastqc` and `multiqc`.
+
+* How?
+
+* From [`prefix.dev`](https://prefix.dev/channels/bioconda/packages/fastqc).
+
+
+## First rule: QC (ii)
+
+```
+$ touch workflow/envs/qc.yml
+$ open workflow/envs/qc.yml
+```
+
+Then add the following contents $\dots$
+
+```
+name: quality-control
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - multiqc
+  - fastqc
+```
+
+
+## First rule: QC (iii)
+
+Now we type the rule$\dots$
+
+```
+$ open workflow/Snakefile
+```
+
+Let's try $\dots$
+
+```
+rule fastqc:
+  conda: "envs/qc.yml"
+  input: "data/data/{seqname}.fastq.gz"
+  output: directory("results/quality-control")
+  shell: "mkidir {output}; fastqc {input} -o {output}"
+```
+
+```
+$ snakemake results/quality-control
+WildcardError in rule fastqc in filesnakemake-tutorial/snakemake-tutorial/workflow/Snakefile, line 18:
+Wildcards in input files cannot be determined from output files: (rule fastqc, line 25, snakemake-tutorial/snakemake-tutorial/workflow/Snakefile)
+'seqname'
+```
+
+
+## First rule: QC (iv)
+
+* That did not work
+
+
+```
+rule fastqc:
+  conda: "envs/qc.yml"
+  input: expand("data/data/{seqname}.fastq.gz", 
+      seqname=glob_wildcards("data/data/{seqname}.fastq.gz").seqname)
+  output: directory("results/quality-control/fastqc")
+  shell: "mkdir {output}; fastqc {input} -o {output}"
+```
+
+* This does!
+
+```
+$ tree results
+results/
+└── quality-control
+    ├── anc_R1_fastqc.html
+    ├── evol1_R1_fastqc.html
+    ...
+    ├── evol2_R2_fastqc.html
+    └── evol2_R2_fastqc.zip
+```
+
+## First rule: QC (v)
+
+Now we analyse the `quality-control` folder...
+
+```
+rule multiqc:
+  conda: "envs/qc.yml"
+  input: rules.fastqc.output
+  output: directory("results/quality-control/multiqc")
+  shell: "multiqc {input} -o {output}"
+```
+![Multiqc output](inclusions/multiqc.png)
 
 # Advanced usage
 
@@ -99,9 +269,15 @@ Taken from the [FAQ](https://snakemake.readthedocs.io/en/v7.0.3/project_info/faq
 
 # Further information
 
+## What I based my presentation on
+
+* [Reproducible Data Analytic Workflows for Economics](https://lachlandeer.github.io/snakemake-econ-r-tutorial/project-organization.html)
+
 ## Repositories
 
 * This presentation: <br>  `https://github.com/Luke-ebbis/mpi-snakemake-overview`.
+
+* The tutorial for readmapping: <br> `https://github.com/Luke-ebbis/snakemake-tutorial`.
 
 * Example workflow for the raven cluster: <br>  `https://github.com/Luke-ebbis/snakemake-pixi`.
 
