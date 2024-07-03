@@ -10,7 +10,7 @@ format:
     csl:  diabetologia.csl
     slide-number: c/t
     scrollable: true
-    navigation-mode: grid
+    navigation-mode: vertical
     mermaid:
       theme: neutral
     #mermaid-format: png
@@ -25,19 +25,35 @@ biblio-style: apalike
 
 # Introduction
 
+> Why reproducibility?
+
 ## Is this familiar?
+
+
+::: {.columns}
+
+
+::: {.column width="40%"}
 
 ::: incremental
 
-1. You are working on the command line.
+1. You see a computational tool you want to use.
 
-2. You execute a whole pipeline and it works nicely.
-
-3. But in the end, you need to re-run it with a different parameter.
+2. You spend a full day installing it.
 
 ::: {.fragment}
 
-> How can you easily do this?
+> How can we all solve this?
+
+:::
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+![The reproducibility iceberg [@kimExperimentingReproducibilityBioinformatics2017]](inclusions/2024-07-03_15-13.png)
 
 :::
 
@@ -45,16 +61,28 @@ biblio-style: apalike
 
 ## Workflow languages
 
-* There are programming languages to solve this exact problem.
+> There are programming languages to solve this exact problem.
 
-  - Snakemake
+- Snakemake
 
-  - CLW
-  
-  - Nextflow.
-  
+- CLW
+
+- Nextflow.
+
+- $\dots$  
 
 ## Snakemake
+
+
+::: {.columns}
+
+
+::: {.column width="40%"}
+
+::: {.fragment}
+
+
+Why would you use it
 
 * Designed for bioinformatics.
 
@@ -64,23 +92,60 @@ biblio-style: apalike
 
 * Large pool of examples.
 
+
+:::
+
+:::
+
+::: {.column width="40%"}
+
+::: {.fragment}
+
+Why wouldn't you use it
+
+* You do not need to make a workflow
+
+* If your dependencies can't be installed using conda.
+
+* If your programme needs to be used by non experts.
+
+:::
+
+:::
+
+
+:::
+
 ## What is a snakemake workflow?
 
 ::: incremental
 
 ::: {.fragment}
 
-![The basic idea of snakemake [@FrequentlyAskedQuestionsa]](inclusions/snakemake-overview.png)
+![](inclusions/snakemake-overview.png)
 
 :::
 
-::: {.fragment}
+::: fragment
 
-```shell
-# Run by typing
-$ snakemake
+```python
+## sha
+rule sha:
+  input: "data/{filename}.{ex}"
+  output: "results/{filename}.{ex}.sha"
+  shell: "sha1sum  {input} | cut -d ' ' -f 1 > {output}"
 ```
 
+:::
+
+::: fragment
+
+```shell
+snakemake results/test.txt.sha
+# --> Snakemake does: 
+# sha1sum data/test.txt | cut -d ' ' -f 1 > results/test.txt.sha
+
+```
 
 :::
 
@@ -93,7 +158,7 @@ $ snakemake
 Get Snakemake with the following commands^[From the [Documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html)]
 
 ```shell
-# Assuming a bashlike environement...
+# Global instalation, assuming a bashlike environment...
 conda install -n base -c conda-forge mamba
 mamba create -c conda-forge--c bioconda -n snakemakes snakemake
 mamba activate snakemake
@@ -102,8 +167,28 @@ mamba activate snakemake
 
 > Lets get started with an example problem...
 
+::: notes
+
+Windows/mac operating system is supported. Project specific version is possible (more at the end).
+
+:::
+
 
 # Read mapping with Snakemake
+
+> Two strains in an evolution experiment.
+
+<br>
+
+::: aside
+Tutorial adapted from `https://genomics.sschmeier.com/`
+:::
+
+## Experimental work
+
+> We have a culture of Ancestor bacteria, we apply an evolution experiment to two cultures.
+
+![](inclusions/workflow.png)
 
 ## Initialisation
 
@@ -181,10 +266,11 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - multiqc
-  - fastqc
+  - fastqc # quality scoring
+  - multiqc # for reporting
+  - fastp # Trimming reads
 ```
-
+From now we need to run with the `--use-conda` parameter.
 
 ## First rule: QC (iii)
 
@@ -201,7 +287,7 @@ rule fastqc:
   conda: "envs/qc.yml"
   input: "data/data/{seqname}.fastq.gz"
   output: directory("results/quality-control")
-  shell: "mkidir {output}; fastqc {input} -o {output}"
+  shell: "mkdir {output}; fastqc {input} -o {output}"
 ```
 
 ```
@@ -210,6 +296,20 @@ WildcardError in rule fastqc in filesnakemake-tutorial/snakemake-tutorial/workfl
 Wildcards in input files cannot be determined from output files: (rule fastqc, line 25, snakemake-tutorial/snakemake-tutorial/workflow/Snakefile)
 'seqname'
 ```
+
+## Intermission: why didn't that work?
+
+::: incremental
+
+> Wildcards are determined from the _output_!
+
+::: {.fragment}
+
+![The Directed acyclic graph [@SnakemakeBioinformaticsHow].](inclusions/dag.svg)
+:::
+
+
+:::
 
 
 ## First rule: QC (iv)
@@ -241,7 +341,6 @@ results/
 
 ## First rule: QC (v)
 
-Now we analyse the `quality-control` folder...
 
 ```
 rule multiqc:
@@ -252,14 +351,19 @@ rule multiqc:
 ```
 ![Multiqc output](inclusions/multiqc.png)
 
+# Sharing your workflow
+
+> So now we have snakemake, conda and possibly other dependencies not yet handled $\dots$.
+
 # Advanced usage
 
 _see the [documentation](https://snakemake.readthedocs.io/en/stable/) for more information_
 
-## Monitoring and stopping the Snakemake.
+## Usefull commands.
 
 
-* `killall -TERM snakemake`
+`killall -TERM snakemake`
+:   Stops the submission of new tasks and kills snakemake when tasks have finished.
 
 ::: aside
 
