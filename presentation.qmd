@@ -414,13 +414,11 @@ Problem
 ## Generate folder with unknown filenames.
 ## makes results/random/<n>-number
 rule random:
-  output: directory("results/random")
-  params:
-    n=10
+  output: directory("results/random-{n}")
   shell:
     """
     mkdir {output} -p;
-    for i in $(seq 1 {params.n});  do
+    for i in $(seq 1 {wildcards.n});  do
      filename="$((1 + $RANDOM % 10))-number"
      touch "{output}/$filename";  done
     """
@@ -453,7 +451,8 @@ def get_random(wildcards):
 
 rule sha:
   input: get_random
-  output: "results/sha.ssv"
+  output: 
+    "results/sha-{n}.ssv"
   shell: 
     "shasum \
       {input} > {output}"
@@ -471,11 +470,11 @@ rule sha:
 
 ## Repositories
 
-* This presentation: <br>  `https://github.com/Luke-ebbis/mpi-snakemake-overview`.
+* This presentation: <br>  [`mpi-snakemake-overview`](https://github.com/Luke-ebbis/mpi-snakemake-overview).
 
-* The tutorial for readmapping: <br> `https://github.com/Luke-ebbis/snakemake-tutorial`.
+* The tutorial for readmapping: <br>  [`snakemake tutorial`](https://github.com/Luke-ebbis/snakemake-tutorial).
 
-* Example workflow for the raven cluster: <br>  `https://github.com/Luke-ebbis/snakemake-pixi`.
+* Example workflow for the raven cluster: <br>  [`snakemake cluster`](https://github.com/Luke-ebbis/snakemake-pixi).
 
 ## Cited works
 
