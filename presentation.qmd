@@ -140,7 +140,7 @@ rule sha:
 
 ::: fragment
 
-```shell
+```bash
 snakemake results/test.txt.sha
 # --> Snakemake does: 
 # sha1sum data/test.txt | cut -d ' ' -f 1 > results/test.txt.sha
@@ -157,7 +157,7 @@ snakemake results/test.txt.sha
 
 Get Snakemake with the following commands^[From the [Documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html)]
 
-```shell
+```bash
 # Global instalation, assuming a bashlike environment...
 conda install -n base -c conda-forge mamba
 mamba create -c conda-forge--c bioconda -n snakemakes snakemake
@@ -192,26 +192,33 @@ Tutorial adapted from `https://genomics.sschmeier.com/`
 
 ## Initialisation
 
+::: incremental
+
+
 ::: {.columns}
 
 ::: {.column width="40%"}
 
-::: incremental
-
+::: fragment
 * We work on a git repository.
-
-* We work with a set file structure.
-
-* We specificy dependencies via conda.
-
 :::
+
+::: fragment
+* We work with a set file structure.
+:::
+
+::: fragment
+* We specificy dependencies via conda.
+:::
+
+
 
 :::
 
 ::: {.column width="60%"}
 
-```shell
-
+::: fragment
+```bash
 $ git init snakemake-example
 $ mkdir -p workflow/envs workflow/scripts
 $ touch workflow/Snakefile
@@ -229,11 +236,15 @@ $ tree
 ```
 :::
 :::
+:::
+
+:::
+
 
 ## First rule: QC (i)
 
 
-```
+```bash
 $ cd data
 $ wget https://osf.io/2jc4a/download -O download.tar.gz
 $ tar -xzf download.tar.gz
@@ -253,14 +264,14 @@ Now quality control:
 
 ## First rule: QC (ii)
 
-```
+```bash
 $ touch workflow/envs/qc.yml
 $ open workflow/envs/qc.yml
 ```
 
 Then add the following contents $\dots$
 
-```
+```yaml
 name: quality-control
 channels:
   - conda-forge
@@ -297,27 +308,13 @@ Wildcards in input files cannot be determined from output files: (rule fastqc, l
 'seqname'
 ```
 
-## Intermission: why didn't that work?
-
-::: incremental
-
-> Wildcards are determined from the _output_!
-
-::: {.fragment}
-
-![The Directed acyclic graph [@SnakemakeBioinformaticsHow].](inclusions/dag.svg)
-:::
-
-
-:::
-
 
 ## First rule: QC (iv)
 
 * That did not work
 
 
-```
+```python
 rule fastqc:
   conda: "envs/qc.yml"
   input: expand("data/data/{seqname}.fastq.gz", 
@@ -328,7 +325,7 @@ rule fastqc:
 
 * This does!
 
-```
+```bash
 $ tree results
 results/
 └── quality-control
@@ -339,10 +336,24 @@ results/
     └── evol2_R2_fastqc.zip
 ```
 
+## Intermission: why didn't that work?
+
+::: incremental
+
+> Wildcards are determined from the _output_!
+
+::: {.fragment}
+
+![The Directed acyclic graph [@SnakemakeBioinformaticsHow].](inclusions/dag.svg){width="80%"}
+:::
+
+
+:::
+
 ## First rule: QC (v)
 
 
-```
+```python
 rule multiqc:
   conda: "envs/qc.yml"
   input: rules.fastqc.output
