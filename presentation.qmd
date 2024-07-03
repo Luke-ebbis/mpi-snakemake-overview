@@ -224,8 +224,8 @@ $ mkdir -p workflow/envs workflow/scripts
 $ touch workflow/Snakefile
 $ mkdir data results
 $ tree
-├── LICENSE
-├── README.md
+├── LICENSE # How can you use it
+├── README.md # How to use it
 |── results/
 |── data/
 └── workflow/
@@ -283,6 +283,12 @@ dependencies:
 ```
 From now we need to run with the `--use-conda` parameter.
 
+::: notes
+
+By default, conda environments are installed in `.snakemake/`.
+
+:::
+
 ## First rule: QC (iii)
 
 Now we type the rule$\dots$
@@ -293,18 +299,21 @@ $ open workflow/Snakefile
 
 Let's try $\dots$
 
-```
+```python
 rule fastqc:
   conda: "envs/qc.yml"
   input: "data/data/{seqname}.fastq.gz"
   output: directory("results/quality-control")
-  shell: "mkdir {output}; fastqc {input} -o {output}"
+  shell: "mkdir -p {output}; fastqc -i {input} -o {output}"
 ```
+Test it $\dots$
 
-```
-$ snakemake results/quality-control
-WildcardError in rule fastqc in filesnakemake-tutorial/snakemake-tutorial/workflow/Snakefile, line 18:
-Wildcards in input files cannot be determined from output files: (rule fastqc, line 25, snakemake-tutorial/snakemake-tutorial/workflow/Snakefile)
+```bash
+$ snakemake --use-conda results/quality-control
+WildcardError in rule fastqc in
+snakemake-tutorial/workflow/Snakefile,
+line 1: Wildcards in input files cannot be determined from output files:
+(rule fastqc, line 4, snakemake-tutorial/workflow/Snakefile)
 'seqname'
 ```
 
@@ -382,6 +391,78 @@ Taken from the [FAQ](https://snakemake.readthedocs.io/en/v7.0.3/project_info/faq
 
 :::
 
+# Questions that may remain
+
+## What if I want to have a command with braces?
+
+> you escape them as such:
+
+```bash
+# wrong ->  grep "{a}"
+grep "{{a}}" # correct
+```
+
+## I want to use a file in a directory?
+
+
+::: {.columns}
+
+::: {.column width="60%"}
+Problem
+
+```python
+## Generate folder with unknown filenames.
+## makes results/random/<n>-number
+rule random:
+  output: directory("results/random")
+  params:
+    n=10
+  shell:
+    """
+    mkdir {output} -p;
+    for i in $(seq 1 {params.n});  do
+     filename="$((1 + $RANDOM % 10))-number"
+     touch "{output}/$filename";  done
+    """
+```
+```
+$ ls
+results/random/2-number results/random/6-number
+```
+
+> We want the sha string.
+
+:::
+
+
+
+
+::: {.column width="40%"}
+Solution
+
+```python
+import glob
+def get_random(wildcards):
+  out=(checkpoints
+    .random
+    .get(**wildcards))
+  f = out.output
+  files = (glob
+    .glob(f"{f}/*-number"))
+  return files
+
+rule sha:
+  input: get_random
+  output: "results/sha.ssv"
+  shell: 
+    "shasum \
+      {input} > {output}"
+
+
+```
+
+:::
+:::
 # Further information
 
 ## What I based my presentation on
