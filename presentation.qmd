@@ -375,6 +375,52 @@ rule multiqc:
 
 > So now we have snakemake, conda and possibly other dependencies not yet handled $\dots$.
 
+```bash
+curl -fsSL https://pixi.sh/install.sh | bash
+```
+
+## Introduction to the `pixi` package manager
+
+```bash
+$ pixi init project
+✔ Initialized project in /home/user/project
+
+➜ cd project
+$ pixi add python numpy cmake
+✔ Added python 3.11.4.*
+✔ Added numpy 1.25.2.*
+✔ Added cmake 3.26.4.*
+
+$ pixi run python --version
+Python 3.11.4
+
+$ pixi add python==3.10
+✔ Added python ==3.10.0.*
+
+$ pixi run python --version
+Python 3.10.
+```
+
+## The `toml` file
+
+```toml
+[project]
+name = "project"
+version = "0.1.0"
+description = "Example project"
+authors = ["Pixi <hi@prefix.dev>"]
+channels = ["conda-forge"]
+platforms = ["linux-64", "win-64", "osx-arm64", "osx-64"]
+
+[tasks]
+start = "python main.py"
+
+[dependencies]
+python = "3.11.4.*"
+numpy = "1.25.2.*"
+cmake = "3.26.4.*"
+```
+
 # Advanced usage
 
 _see the [documentation](https://snakemake.readthedocs.io/en/stable/) for more information_
