@@ -421,6 +421,25 @@ numpy = "1.25.2.*"
 cmake = "3.26.4.*"
 ```
 
+## Where are things stored?
+
+```
+$ tree
+├── LICENSE
+├── pixi.toml
+├── pixi.lock
+├── README.md
+|── results/
+|── data/
+|── workflow/
+|   ├── envs/
+|   |── scripts/
+|   └── Snakefile
+|──── .snakemake/
+└──── .pixi/
+
+```
+
 # Advanced usage
 
 _see the [documentation](https://snakemake.readthedocs.io/en/stable/) for more information_
